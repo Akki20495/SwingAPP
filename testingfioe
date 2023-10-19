@@ -1,73 +1,42 @@
-To run Cucumber tests with JSON data, you can follow these steps:
-
-1. **Prepare Your JSON Data**:
-   - Create a JSON file containing the test data. Each object in the JSON should represent a set of data for a specific test scenario. For example:
-   ```json
-   [
-       { "username": "user1", "password": "pass123" },
-       { "username": "user2", "password": "password" },
-       { "username": "testuser", "password": "testpass" }
-   ]
-   ```
-
-2. **Feature File**:
-   - In your feature file, create a scenario outline as shown in the previous example. Use placeholders for the data you want to replace, such as `<username>` and `<password>`.
-
-3. **Step Definitions**:
-   - In your step definitions, read the JSON data and map it to the corresponding placeholders in your scenario outline.
-
-Here's an example of how your step definitions might look:
+Certainly! Below is an example of Java code to set up and use Selenium Grid. First, you need to have Selenium WebDriver and Selenium Server JARs in your project's classpath.
 
 ```java
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
-public class MyStepDefinitions {
+import java.net.MalformedURLException;
+import java.net.URL;
 
-    @Given("the user is on the login page")
-    public void navigateToLoginPage() {
-        // Add code to navigate to the login page
-    }
+public class SeleniumGridExample {
 
-    @When("the user enters data from JSON file {string}")
-    public void enterDataFromJSON(String jsonFilePath) {
-        // Read the JSON data from the file
-        JSONObject jsonObject = readJsonFile(jsonFilePath);
-        // Extract username and password and fill in the login fields
-        String username = jsonObject.get("username").toString();
-        String password = jsonObject.get("password").toString();
-        // Add code to enter this data in the login fields
-    }
+    public static void main(String[] args) throws MalformedURLException {
+        // Define the URL of the Selenium Grid hub
+        URL hubURL = new URL("http://<grid-hub-ip>:4444/wd/hub");
 
-    @Then("the user is logged in successfully")
-    public void verifySuccessfulLogin() {
-        // Add assertions to verify successful login
-    }
+        // Define the DesiredCapabilities to specify browser and platform
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setBrowserName("chrome");
+        capabilities.setPlatform(Platform.WINDOWS);
 
-    private JSONObject readJsonFile(String jsonFilePath) {
-        // Add code to read and parse the JSON file
-        JSONParser parser = new JSONParser();
-        try {
-            Object obj = parser.parse(new FileReader(jsonFilePath));
-            return (JSONObject) obj;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        // Create a WebDriver instance that connects to the Selenium Grid hub
+        WebDriver driver = new RemoteWebDriver(hubURL, capabilities);
+
+        // Perform actions on the remote WebDriver
+        driver.get("https://www.example.com");
+        WebElement element = driver.findElement(By.name("q"));
+        element.sendKeys("Selenium Grid");
+        element.submit();
+
+        // Close the WebDriver session
+        driver.quit();
     }
 }
 ```
 
-4. **Run Tests**:
-   - Run your Cucumber tests. You can pass the path to your JSON data file as an argument to your tests.
+Replace `<grid-hub-ip>` with the actual IP or hostname of your Selenium Grid hub. This code connects to the Selenium Grid hub and runs tests on the specified browser and platform.
 
-For example, if you're using the command line, you can run your tests like this:
-
-```bash
-cucumber --tags @yourTag --glue yourStepDefinitionsPath path/to/your/data.json
-```
-
-Make sure to adjust the step definitions and JSON data file path as per your project structure and requirements.
+Make sure you have the Selenium Server running on the machine specified as the hub and have nodes registered with different browser and platform configurations. This allows you to distribute test execution across multiple machines and browsers.
